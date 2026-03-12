@@ -4,64 +4,85 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Code, Megaphone, ShoppingCart, BarChart3, Palette, ArrowRight, Clock, Trophy, Target } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { ArrowRight, Clock, Trophy, Target, MessageCircle, BarChart3, Calendar } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
-const scenarios = [
-  { id: "software-engineer", title: "Software Engineer", icon: Code, description: "Technical and behavioral questions for engineering roles", difficulty: "Intermediate" },
-  { id: "marketing-manager", title: "Marketing Manager", icon: Megaphone, description: "Strategy, campaign planning, and leadership questions", difficulty: "Intermediate" },
-  { id: "sales-associate", title: "Sales Associate", icon: ShoppingCart, description: "Customer handling, negotiation, and sales strategy", difficulty: "Beginner" },
-  { id: "product-manager", title: "Product Manager", icon: Briefcase, description: "Product sense, metrics, and cross-functional leadership", difficulty: "Advanced" },
-  { id: "data-scientist", title: "Data Scientist", icon: BarChart3, description: "Statistics, ML concepts, and analytical problem solving", difficulty: "Advanced" },
-  { id: "ux-designer", title: "UX Designer", icon: Palette, description: "Design thinking, portfolio review, and user research", difficulty: "Intermediate" },
-];
+interface SessionRow {
+  id: string;
+  scenario_title: string;
+  avatar_name: string;
+  avatar_personality: string;
+  duration_seconds: number | null;
+  status: string;
+  created_at: string;
+  performance_reports: { overall_score: number }[];
+}
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [sessions, setSessions] = useState<SessionRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-      }
+      if (event === "SIGNED_OUT" || !session) navigate("/auth");
+      else setUser(session.user);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) navigate("/auth");
-      else setUser(session.user);
+      else {
+        setUser(session.user);
+        loadSessions(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const loadSessions = async (uid: string) => {
+    const { data } = await supabase
+      .from("practice_sessions")
+      .select("id, scenario_title, avatar_name, avatar_personality, duration_seconds, status, created_at, performance_reports(overall_score)")
+      .eq("user_id", uid)
+      .eq("status", "completed")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setSessions((data as any) || []);
+    setLoading(false);
+  };
+
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "there";
+  const totalSessions = sessions.length;
+  const bestScore = sessions.reduce((max, s) => {
+    const score = s.performance_reports?.[0]?.overall_score || 0;
+    return score > max ? score : max;
+  }, 0);
+  const avgScore = totalSessions > 0
+    ? Math.round(sessions.reduce((sum, s) => sum + (s.performance_reports?.[0]?.overall_score || 0), 0) / totalSessions)
+    : 0;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar isAuthenticated />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-16">
         {/* Greeting */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">
             Hi, <span className="text-gradient">{firstName}</span> 👋
           </h1>
-          <p className="text-muted-foreground">Choose a scenario and start practicing. Your confidence grows with every session.</p>
+          <p className="text-muted-foreground">Track your progress and start a new practice session.</p>
         </motion.div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 mb-10">
           {[
-            { icon: Clock, label: "Sessions", value: "0", color: "text-primary" },
-            { icon: Trophy, label: "Best Score", value: "—", color: "text-warning" },
-            { icon: Target, label: "Streak", value: "0 days", color: "text-success" },
+            { icon: Clock, label: "Sessions", value: totalSessions.toString(), color: "text-primary" },
+            { icon: Trophy, label: "Best Score", value: bestScore ? `${bestScore}%` : "—", color: "text-warning" },
+            { icon: Target, label: "Average", value: avgScore ? `${avgScore}%` : "—", color: "text-success" },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -77,34 +98,80 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Scenarios */}
-        <h2 className="font-display text-xl font-semibold mb-5">Choose Your Interview</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {scenarios.map((scenario, i) => (
-            <motion.div
-              key={scenario.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + i * 0.05 }}
-              className="bg-card rounded-xl border border-border p-5 card-shadow hover:shadow-lg hover:border-primary/20 transition-all group cursor-pointer"
-              onClick={() => navigate(`/practice/${scenario.id}`)}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <scenario.icon className="w-5 h-5 text-primary" />
-                </div>
-                <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground font-medium">
-                  {scenario.difficulty}
-                </span>
-              </div>
-              <h3 className="font-display font-semibold text-lg mb-1">{scenario.title}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{scenario.description}</p>
-              <Button variant="ghost" size="sm" className="group-hover:text-primary transition-colors p-0">
-                Start Practice <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </motion.div>
-          ))}
-        </div>
+        {/* Start New Session CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-card rounded-2xl border border-border p-6 card-shadow mb-10"
+        >
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="w-12 h-12 rounded-xl btn-gradient flex items-center justify-center soft-shadow">
+              <MessageCircle className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="font-display text-xl font-semibold">Ready to Practice?</h2>
+              <p className="text-sm text-muted-foreground">Choose a scenario and AI partner to start a conversation.</p>
+            </div>
+            <Button onClick={() => navigate("/scenarios")} className="btn-gradient text-primary-foreground border-0 soft-shadow">
+              Start New Session <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Past Sessions */}
+        <h2 className="font-display text-xl font-semibold mb-4">Past Sessions</h2>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : sessions.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-card rounded-xl border border-border p-8 card-shadow text-center"
+          >
+            <MessageCircle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground text-sm">No sessions yet. Start your first practice!</p>
+          </motion.div>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session, i) => {
+              const score = session.performance_reports?.[0]?.overall_score || 0;
+              const date = new Date(session.created_at);
+              const mins = session.duration_seconds ? Math.floor(session.duration_seconds / 60) : 0;
+              const secs = session.duration_seconds ? session.duration_seconds % 60 : 0;
+
+              return (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-card rounded-xl border border-border p-4 card-shadow hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <BarChart3 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{session.scenario_title}</p>
+                      <p className="text-xs text-muted-foreground">{session.avatar_name} · {session.avatar_personality}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-lg">{score}%</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        {date.toLocaleDateString()}
+                        <Clock className="w-3 h-3 ml-1" />
+                        {mins}:{secs.toString().padStart(2, "0")}
+                      </div>
+                    </div>
+                  </div>
+                  {score > 0 && <Progress value={score} className="h-1.5 mt-3" />}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </main>
     </div>
   );
