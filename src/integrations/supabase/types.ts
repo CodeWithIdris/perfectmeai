@@ -17,8 +17,10 @@ export type Database = {
       performance_reports: {
         Row: {
           answer_quality_score: number
+          better_responses: Json
           clarity_score: number
           confidence_score: number
+          conversation_flow_score: number
           created_at: string
           detailed_feedback: Json
           filler_words_count: number
@@ -26,14 +28,18 @@ export type Database = {
           id: string
           overall_feedback: string
           overall_score: number
+          response_structure_score: number
           session_id: string
+          strengths: Json
           suggestions: Json
           user_id: string
         }
         Insert: {
           answer_quality_score?: number
+          better_responses?: Json
           clarity_score?: number
           confidence_score?: number
+          conversation_flow_score?: number
           created_at?: string
           detailed_feedback?: Json
           filler_words_count?: number
@@ -41,14 +47,18 @@ export type Database = {
           id?: string
           overall_feedback?: string
           overall_score?: number
+          response_structure_score?: number
           session_id: string
+          strengths?: Json
           suggestions?: Json
           user_id: string
         }
         Update: {
           answer_quality_score?: number
+          better_responses?: Json
           clarity_score?: number
           confidence_score?: number
+          conversation_flow_score?: number
           created_at?: string
           detailed_feedback?: Json
           filler_words_count?: number
@@ -56,7 +66,9 @@ export type Database = {
           id?: string
           overall_feedback?: string
           overall_score?: number
+          response_structure_score?: number
           session_id?: string
+          strengths?: Json
           suggestions?: Json
           user_id?: string
         }
