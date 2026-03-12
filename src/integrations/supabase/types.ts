@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      performance_reports: {
+        Row: {
+          answer_quality_score: number
+          clarity_score: number
+          confidence_score: number
+          created_at: string
+          detailed_feedback: Json
+          filler_words_count: number
+          filler_words_score: number
+          id: string
+          overall_feedback: string
+          overall_score: number
+          session_id: string
+          suggestions: Json
+          user_id: string
+        }
+        Insert: {
+          answer_quality_score?: number
+          clarity_score?: number
+          confidence_score?: number
+          created_at?: string
+          detailed_feedback?: Json
+          filler_words_count?: number
+          filler_words_score?: number
+          id?: string
+          overall_feedback?: string
+          overall_score?: number
+          session_id: string
+          suggestions?: Json
+          user_id: string
+        }
+        Update: {
+          answer_quality_score?: number
+          clarity_score?: number
+          confidence_score?: number
+          created_at?: string
+          detailed_feedback?: Json
+          filler_words_count?: number
+          filler_words_score?: number
+          id?: string
+          overall_feedback?: string
+          overall_score?: number
+          session_id?: string
+          suggestions?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_reports_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "practice_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_sessions: {
+        Row: {
+          avatar_id: string
+          avatar_name: string
+          avatar_personality: string
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          scenario_title: string
+          scenario_type: string
+          started_at: string
+          status: string
+          transcript: Json
+          user_id: string
+        }
+        Insert: {
+          avatar_id: string
+          avatar_name: string
+          avatar_personality: string
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          scenario_title: string
+          scenario_type: string
+          started_at?: string
+          status?: string
+          transcript?: Json
+          user_id: string
+        }
+        Update: {
+          avatar_id?: string
+          avatar_name?: string
+          avatar_personality?: string
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          scenario_title?: string
+          scenario_type?: string
+          started_at?: string
+          status?: string
+          transcript?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
