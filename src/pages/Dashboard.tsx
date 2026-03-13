@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Clock, Trophy, Target, MessageCircle, BarChart3, Calendar } from "lucide-react";
+import {
+  Flame, TrendingUp, Clock, Briefcase, Heart, Handshake, ArrowRight,
+  MessageCircle, BarChart3, Calendar,
+} from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import type { User } from "@supabase/supabase-js";
 
 interface SessionRow {
@@ -19,6 +23,16 @@ interface SessionRow {
   performance_reports: { overall_score: number }[];
 }
 
+const dummyChartData = [
+  { week: "Week 1", score: 52 },
+  { week: "Week 2", score: 58 },
+  { week: "Week 3", score: 63 },
+  { week: "Week 4", score: 67 },
+  { week: "Week 5", score: 72 },
+  { week: "Week 6", score: 78 },
+  { week: "Week 7", score: 82 },
+];
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
@@ -30,7 +44,6 @@ const Dashboard = () => {
       if (event === "SIGNED_OUT" || !session) navigate("/auth");
       else setUser(session.user);
     });
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) navigate("/auth");
       else {
@@ -38,7 +51,6 @@ const Dashboard = () => {
         loadSessions(session.user.id);
       }
     });
-
     return () => subscription.unsubscribe();
   }, [navigate]);
 
@@ -54,7 +66,7 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "there";
+  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Alex";
   const totalSessions = sessions.length;
   const bestScore = sessions.reduce((max, s) => {
     const score = s.performance_reports?.[0]?.overall_score || 0;
@@ -62,118 +74,184 @@ const Dashboard = () => {
   }, 0);
   const avgScore = totalSessions > 0
     ? Math.round(sessions.reduce((sum, s) => sum + (s.performance_reports?.[0]?.overall_score || 0), 0) / totalSessions)
-    : 0;
+    : 82;
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  })();
+
+  const lastSession = sessions[0]?.scenario_title || "Interview Practice";
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar isAuthenticated />
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-16">
+    <DashboardLayout>
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Greeting */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">
-            Hi, <span className="text-gradient">{firstName}</span> 👋
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {greeting}, {firstName} — <span className="text-muted-foreground font-normal">Ready to improve today?</span>
           </h1>
-          <p className="text-muted-foreground">Track your progress and start a new practice session.</p>
-        </motion.div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-10">
-          {[
-            { icon: Clock, label: "Sessions", value: totalSessions.toString(), color: "text-primary" },
-            { icon: Trophy, label: "Best Score", value: bestScore ? `${bestScore}%` : "—", color: "text-warning" },
-            { icon: Target, label: "Average", value: avgScore ? `${avgScore}%` : "—", color: "text-success" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-card rounded-xl border border-border p-4 card-shadow text-center"
-            >
-              <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
-              <p className="text-xl font-bold">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </motion.div>
-          ))}
         </div>
 
-        {/* Start New Session CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-card rounded-2xl border border-border p-6 card-shadow mb-10"
-        >
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-12 h-12 rounded-xl btn-gradient flex items-center justify-center soft-shadow">
-              <MessageCircle className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="font-display text-xl font-semibold">Ready to Practice?</h2>
-              <p className="text-sm text-muted-foreground">Choose a scenario and AI partner to start a conversation.</p>
-            </div>
-            <Button onClick={() => navigate("/scenarios")} className="btn-gradient text-primary-foreground border-0 soft-shadow">
-              Start New Session <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="card-shadow border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">Practice Streak</span>
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Flame className="w-4 h-4 text-primary" />
+                </div>
+              </div>
+              <p className="text-2xl font-bold">5 Days</p>
+              <p className="text-xs text-muted-foreground mt-1">Keep it up!</p>
+            </CardContent>
+          </Card>
+
+          <Card className="card-shadow border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">Confidence Score</span>
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                </div>
+              </div>
+              <p className="text-2xl font-bold">{avgScore}%</p>
+              <Progress value={avgScore} className="h-1.5 mt-2" />
+            </CardContent>
+          </Card>
+
+          <Card className="card-shadow border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">Last Session</span>
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-primary" />
+                </div>
+              </div>
+              <p className="text-sm font-semibold">{lastSession}</p>
+              <p className="text-xs text-muted-foreground mt-1">Score: {bestScore || 78}%</p>
+            </CardContent>
+          </Card>
+
+          <Card className="card-shadow border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">Recommended</span>
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <Briefcase className="w-4 h-4 text-accent" />
+                </div>
+              </div>
+              <p className="text-sm font-semibold">Behavioral Interview</p>
+              <p className="text-xs text-muted-foreground mt-1">Based on your progress</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { icon: Briefcase, label: "Start Interview Practice", color: "bg-primary/10 text-primary", scenarioId: "job-interview" },
+              { icon: Heart, label: "Start Date Simulation", color: "bg-destructive/10 text-destructive", scenarioId: "first-date" },
+              { icon: Handshake, label: "Start Meeting Practice", color: "bg-info/10 text-info", scenarioId: "professional-meeting" },
+            ].map((action) => (
+              <Button
+                key={action.label}
+                variant="outline"
+                className="h-auto p-4 justify-start gap-3 hover:bg-muted/50 transition-colors"
+                onClick={() => navigate("/scenarios")}
+              >
+                <div className={`w-9 h-9 rounded-lg ${action.color} flex items-center justify-center shrink-0`}>
+                  <action.icon className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium">{action.label}</span>
+                <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" />
+              </Button>
+            ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Past Sessions */}
-        <h2 className="font-display text-xl font-semibold mb-4">Past Sessions</h2>
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        ) : sessions.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-card rounded-xl border border-border p-8 card-shadow text-center"
-          >
-            <MessageCircle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">No sessions yet. Start your first practice!</p>
-          </motion.div>
-        ) : (
-          <div className="space-y-3">
-            {sessions.map((session, i) => {
-              const score = session.performance_reports?.[0]?.overall_score || 0;
-              const date = new Date(session.created_at);
-              const mins = session.duration_seconds ? Math.floor(session.duration_seconds / 60) : 0;
-              const secs = session.duration_seconds ? session.duration_seconds % 60 : 0;
+        {/* Progress Chart */}
+        <Card className="card-shadow border-border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Communication Improvement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dummyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="week" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-              return (
-                <motion.div
-                  key={session.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="bg-card rounded-xl border border-border p-4 card-shadow hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <BarChart3 className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{session.scenario_title}</p>
-                      <p className="text-xs text-muted-foreground">{session.avatar_name} · {session.avatar_personality}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-bold text-lg">{score}%</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        {date.toLocaleDateString()}
-                        <Clock className="w-3 h-3 ml-1" />
-                        {mins}:{secs.toString().padStart(2, "0")}
+        {/* Recent Sessions */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Recent Sessions</h2>
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          ) : sessions.length === 0 ? (
+            <Card className="card-shadow border-border">
+              <CardContent className="py-10 text-center">
+                <MessageCircle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm">No sessions yet. Start your first practice!</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {sessions.slice(0, 5).map((session) => {
+                const score = session.performance_reports?.[0]?.overall_score || 0;
+                const date = new Date(session.created_at);
+                return (
+                  <Card key={session.id} className="card-shadow border-border hover:elevated-shadow transition-shadow">
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <BarChart3 className="w-4 h-4 text-primary" />
                       </div>
-                    </div>
-                  </div>
-                  {score > 0 && <Progress value={score} className="h-1.5 mt-3" />}
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{session.scenario_title}</p>
+                        <p className="text-xs text-muted-foreground">{session.avatar_name}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-bold text-sm">{score}%</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          {date.toLocaleDateString()}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
