@@ -40,18 +40,14 @@ const Report = () => {
   const navigate = useNavigate();
   const state = location.state as any;
 
-  if (!state) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">No session data found.</p>
-          <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
-        </div>
-      </div>
-    );
-  }
-
-  const { messages, scenario, avatarName, avatarPersonality, scenarioType, sessionId, fillerWordsCount, durationSeconds } = state;
+  const messages = state?.messages;
+  const scenario = state?.scenario;
+  const avatarName = state?.avatarName;
+  const avatarPersonality = state?.avatarPersonality;
+  const scenarioType = state?.scenarioType;
+  const sessionId = state?.sessionId;
+  const fillerWordsCount = state?.fillerWordsCount;
+  const durationSeconds = state?.durationSeconds;
 
   const [scores, setScores] = useState<FeedbackScore[] | null>(null);
   const [overallFeedback, setOverallFeedback] = useState("");
@@ -61,7 +57,7 @@ const Report = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!messages || messages.length === 0) { navigate("/dashboard"); return; }
+    if (!state || !messages || messages.length === 0) { navigate("/dashboard"); return; }
     analyzeConversation();
   }, []);
 
