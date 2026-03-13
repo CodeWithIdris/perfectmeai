@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import ScenarioSelect from "./pages/ScenarioSelect";
 import Practice from "./pages/Practice";
 import Report from "./pages/Report";
+import Progress from "./pages/Progress";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/scenarios" element={<ScenarioSelect />} />
           <Route path="/practice/:scenarioId/:avatarId" element={<Practice />} />
           <Route path="/report" element={<Report />} />
+          <Route path="/progress" element={<Progress />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
