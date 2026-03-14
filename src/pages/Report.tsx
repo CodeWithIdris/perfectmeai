@@ -264,6 +264,32 @@ const Report = () => {
           ))}
         </div>
 
+        {/* Suggested Next Practice */}
+        <Card className="card-shadow border-border bg-primary/5">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm mb-1">Recommended Next Session</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {scenarioType === "interview"
+                    ? "Try a Behavioral Interview with a Strict Interviewer to push your STAR-method answers further."
+                    : scenarioType === "date"
+                    ? "Practice with the Curious Partner to improve deep-conversation skills."
+                    : scenarioType === "meeting"
+                    ? "Challenge yourself with the Skeptical Executive to sharpen your persuasion skills."
+                    : "Try a Professional Meeting scenario to practice more structured communication."}
+                </p>
+                <Button size="sm" onClick={() => navigate("/scenarios")} className="btn-gradient text-primary-foreground border-0">
+                  <ArrowRight className="w-3.5 h-3.5 mr-1" /> Start Suggested Practice
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <Button variant="outline" onClick={() => navigate("/dashboard")}>
