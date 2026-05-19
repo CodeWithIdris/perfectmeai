@@ -45,10 +45,13 @@ const Practice = () => {
   const { isListening, isSupported: isSpeechSupported, interimTranscript, startListening, stopListening } =
     useSpeechRecognition({ onResult: handleSpeechResult, continuous: true });
 
-  const toggleMic = useCallback(() => {
+  const handleHoldStart = useCallback(() => {
+    if (!isListening) startListening();
+  }, [isListening, startListening]);
+
+  const handleHoldEnd = useCallback(() => {
     if (isListening) stopListening();
-    else startListening();
-  }, [isListening, startListening, stopListening]);
+  }, [isListening, stopListening]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -185,7 +188,8 @@ const Practice = () => {
         {sessionStarted && (
           <ChatInput
             input={input} onInputChange={setInput} onSend={sendMessage} isLoading={isLoading}
-            isListening={isListening} isSpeechSupported={isSpeechSupported} onMicToggle={toggleMic}
+            isListening={isListening} isSpeechSupported={isSpeechSupported}
+            onHoldStart={handleHoldStart} onHoldEnd={handleHoldEnd}
             interimTranscript={interimTranscript}
           />
         )}
