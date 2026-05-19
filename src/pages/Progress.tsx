@@ -8,14 +8,11 @@ import { Progress } from "@/components/ui/progress";
 import { Trophy, Clock, MessageCircle, TrendingUp, Award, Flame, Star, Target } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 
-const dummyTrend = [
+const fallbackTrend = [
   { session: "1", confidence: 52, clarity: 48, overall: 50 },
   { session: "2", confidence: 58, clarity: 55, overall: 56 },
   { session: "3", confidence: 63, clarity: 60, overall: 61 },
   { session: "4", confidence: 68, clarity: 67, overall: 67 },
-  { session: "5", confidence: 75, clarity: 72, overall: 73 },
-  { session: "6", confidence: 78, clarity: 76, overall: 77 },
-  { session: "7", confidence: 82, clarity: 80, overall: 81 },
 ];
 
 const achievements = [
@@ -32,24 +29,35 @@ const ProgressPage = () => {
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalMinutes, setTotalMinutes] = useState(0);
   const [avgScore, setAvgScore] = useState(0);
+  const [trend, setTrend] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { navigate("/auth"); return; }
       const { data } = await supabase
         .from("practice_sessions")
-        .select("duration_seconds, performance_reports(overall_score)")
+        .select("duration_seconds, created_at, performance_reports(overall_score, confidence_score, clarity_score)")
         .eq("user_id", session.user.id)
-        .eq("status", "completed");
+        .eq("status", "completed")
+        .order("created_at", { ascending: true });
 
       if (data) {
         setTotalSessions(data.length);
         setTotalMinutes(Math.round(data.reduce((sum: number, s: any) => sum + (s.duration_seconds || 0), 0) / 60));
-        const scores = data.map((s: any) => s.performance_reports?.[0]?.overall_score || 0).filter((s: number) => s > 0);
+        const withReports = data.filter((s: any) => s.performance_reports?.[0]);
+        const scores = withReports.map((s: any) => s.performance_reports[0].overall_score || 0).filter((s: number) => s > 0);
         setAvgScore(scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0);
+        setTrend(withReports.map((s: any, i: number) => ({
+          session: String(i + 1),
+          overall: s.performance_reports[0].overall_score || 0,
+          confidence: s.performance_reports[0].confidence_score || 0,
+          clarity: s.performance_reports[0].clarity_score || 0,
+        })));
       }
     });
   }, [navigate]);
+
+  const trendData = trend.length > 0 ? trend : fallbackTrend;
 
   return (
     <DashboardLayout>
