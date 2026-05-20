@@ -36,8 +36,14 @@ const ScenarioSelect = () => {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">Choose a Scenario</h1>
+        <div className="space-y-3 border-b border-white/5 pb-6">
+          <div className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
+            <span>MOD_02 // SCENARIO_LIBRARY</span>
+            <span className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+            <span className="text-primary/70">{scenarios.length.toString().padStart(2, "0")} ACTIVE</span>
+          </div>
+          <h1 className="text-3xl font-display font-extrabold tracking-tight">Choose a <span className="text-gradient">Scenario</span></h1>
           <p className="text-muted-foreground text-sm">Select a scenario type, then pick an AI conversation partner.</p>
         </div>
 
