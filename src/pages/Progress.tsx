@@ -62,8 +62,14 @@ const ProgressPage = () => {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">Your Progress</h1>
+        <div className="space-y-3 border-b border-white/5 pb-6">
+          <div className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_hsl(var(--accent))]" />
+            <span>MOD_04 // PROGRESS</span>
+            <span className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+            <span className="text-accent/70">TELEMETRY_LIVE</span>
+          </div>
+          <h1 className="text-3xl font-display font-extrabold tracking-tight">Your <span className="text-gradient">Progress</span></h1>
           <p className="text-muted-foreground text-sm">Track your improvement over time.</p>
         </div>
 

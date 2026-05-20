@@ -121,24 +121,35 @@ const Report = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-background flex items-center justify-center scanlines">
+        <div className="text-center glass rounded-2xl p-10 max-w-sm">
+          <div className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-primary mb-4">ANALYZING_TRANSCRIPT</div>
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-4 neon-glow">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Analyzing Your Performance</h2>
-          <p className="text-sm text-muted-foreground max-w-xs mx-auto">Evaluating clarity, confidence, structure, and more...</p>
+          <h2 className="text-xl font-display font-bold mb-2">Evaluating Performance</h2>
+          <p className="text-sm text-muted-foreground">Computing clarity, confidence, structure, and more...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Dashboard
-        </Button>
+    <div className="min-h-screen bg-background relative">
+      <div className="fixed inset-0 pointer-events-none -z-0">
+        <div className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full blur-[160px] bg-primary/[0.08]" />
+        <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] rounded-full blur-[160px] bg-accent/[0.08]" />
+      </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8 relative z-10">
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Dashboard
+          </Button>
+          <div className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_hsl(var(--accent))] animate-pulse" />
+            <span>MOD_03 // PERFORMANCE_REPORT</span>
+          </div>
+        </div>
 
         {/* Overall Score */}
         <Card className="card-shadow border-border text-center">

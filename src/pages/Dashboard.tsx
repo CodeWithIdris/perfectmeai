@@ -89,9 +89,16 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Greeting */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {greeting}, {firstName} — <span className="text-muted-foreground font-normal">Ready to improve today?</span>
+        <div className="space-y-3 border-b border-white/5 pb-6">
+          <div className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />
+            <span>MOD_01 // DASHBOARD</span>
+            <span className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+            <span className="text-primary/70">{new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase()}</span>
+          </div>
+          <h1 className="text-3xl font-display font-extrabold tracking-tight">
+            {greeting}, <span className="text-gradient">{firstName}</span>
+            <span className="block text-base font-sans font-normal text-muted-foreground mt-1">Ready to improve today?</span>
           </h1>
         </div>
 
