@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
 } from "recharts";
-import { chartTooltipStyle, chartTooltipLabelStyle, chartColors } from "@/lib/chart-theme";
+import { chartColors } from "@/lib/chart-theme";
 
 interface FeedbackScore {
   label: string;
