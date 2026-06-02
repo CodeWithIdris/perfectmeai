@@ -10,6 +10,7 @@ import {
   MessageCircle, BarChart3, Calendar,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { chartAxisProps, chartGridProps, chartTooltipStyle, chartTooltipLabelStyle, chartColors } from "@/lib/chart-theme";
 import type { User } from "@supabase/supabase-js";
 
 interface SessionRow {
@@ -86,7 +87,7 @@ const Dashboard = () => {
   const lastSession = sessions[0]?.scenario_title || "Interview Practice";
 
   return (
-    <DashboardLayout>
+    <DashboardLayout module="MOD_01 // DASHBOARD" meta={`SESSIONS: ${String(totalSessions).padStart(2, "0")}`}>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Greeting */}
         <div className="space-y-3 border-b border-white/5 pb-6">
@@ -191,24 +192,17 @@ const Dashboard = () => {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dummyChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="week" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
+                  <CartesianGrid {...chartGridProps} />
+                  <XAxis dataKey="week" {...chartAxisProps} />
+                  <YAxis domain={[0, 100]} {...chartAxisProps} />
+                  <Tooltip contentStyle={chartTooltipStyle} labelStyle={chartTooltipLabelStyle} cursor={{ stroke: "hsl(var(--primary) / 0.3)", strokeWidth: 1 }} />
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="hsl(var(--primary))"
+                    stroke={chartColors.primary}
                     strokeWidth={2}
-                    dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ fill: chartColors.primary, r: 3 }}
+                    activeDot={{ r: 6, stroke: chartColors.primary, strokeWidth: 2, fill: "hsl(var(--background))" }}
                   />
                 </LineChart>
               </ResponsiveContainer>

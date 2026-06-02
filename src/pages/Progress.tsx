@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Trophy, Clock, MessageCircle, TrendingUp, Award, Flame, Star, Target } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { chartAxisProps, chartGridProps, chartTooltipStyle, chartTooltipLabelStyle, chartColors } from "@/lib/chart-theme";
 
 const fallbackTrend = [
   { session: "1", confidence: 52, clarity: 48, overall: 50 },
@@ -60,7 +61,7 @@ const ProgressPage = () => {
   const trendData = trend.length > 0 ? trend : fallbackTrend;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout module="MOD_04 // PROGRESS" meta="TELEMETRY_LIVE">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="space-y-3 border-b border-white/5 pb-6">
           <div className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
@@ -119,13 +120,13 @@ const ProgressPage = () => {
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="session" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" label={{ value: "Session", position: "insideBottom", offset: -5 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
-                  <Area type="monotone" dataKey="overall" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.1} strokeWidth={2} />
-                  <Area type="monotone" dataKey="confidence" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.05} strokeWidth={1.5} strokeDasharray="4 4" />
-                  <Area type="monotone" dataKey="clarity" stroke="hsl(152 60% 45%)" fill="hsl(152 60% 45%)" fillOpacity={0.05} strokeWidth={1.5} strokeDasharray="4 4" />
+                  <CartesianGrid {...chartGridProps} />
+                  <XAxis dataKey="session" {...chartAxisProps} />
+                  <YAxis domain={[0, 100]} {...chartAxisProps} />
+                  <Tooltip contentStyle={chartTooltipStyle} labelStyle={chartTooltipLabelStyle} />
+                  <Area type="monotone" dataKey="overall" stroke={chartColors.primary} fill={chartColors.primary} fillOpacity={0.18} strokeWidth={2} />
+                  <Area type="monotone" dataKey="confidence" stroke={chartColors.accent} fill={chartColors.accent} fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="4 4" />
+                  <Area type="monotone" dataKey="clarity" stroke={chartColors.success} fill={chartColors.success} fillOpacity={0.06} strokeWidth={1.5} strokeDasharray="4 4" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

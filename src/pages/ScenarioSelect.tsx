@@ -34,7 +34,7 @@ const ScenarioSelect = () => {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout module="MOD_02 // SCENARIO_LIBRARY" meta={`${scenarios.length.toString().padStart(2, "0")} ACTIVE`}>
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="space-y-3 border-b border-white/5 pb-6">
           <div className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
