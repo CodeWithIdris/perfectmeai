@@ -130,6 +130,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          goals: string[]
+          onboarding_completed: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          goals?: string[]
+          onboarding_completed?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          goals?: string[]
+          onboarding_completed?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
